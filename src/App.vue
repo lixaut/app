@@ -1,10 +1,16 @@
 <template>
-  <div>我是跟组件</div>
+  <div>
+    <Header/>
+  </div>
 </template>
 
 <script>
+  import Header from './components/Header/index.vue'
   export default {
     name: 'App',
+    components: {
+      Header,
+    }
   }
 </script>
 
