@@ -1,10 +1,22 @@
 <template>
-    <div>我是主页</div>
+    <div>
+        <!-- 三级联动组件 -->
+        <TypeNav/>
+        <ListContainer/>
+        <Recommend/>
+    </div>
 </template>
 
 <script>
+    import ListContainer from '@/pages/Home/ListContainer'
+    import Recommend from '@/pages/Home/Recommend'
+
     export default {
-        name: 'Home'
+        name: 'Home',
+        components: {
+            ListContainer,
+            Recommend,
+        },
     }
 </script>
 
