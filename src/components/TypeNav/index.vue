@@ -14,17 +14,26 @@
         <a href="###">秒杀</a>
       </nav>
       <div class="sort">
-        <div class="all-sort-list2">
+        <div class="all-sort-list2" @click="goSearch" @mouseleave="leaveIndex">
           <div
             class="item"
             v-for="(c1, index) in categoryList"
             :key="c1.categoryId"
-            :class="{cur: currentIndex==index}"
+            :class="{ cur: currentIndex == index }"
           >
-            <h3 @mouseenter="changeIndex(index)" @mouseleave="leaveIndex">
-              <a href="">{{ c1.categoryName }}</a>
+            <h3 @mouseenter="changeIndex(index)">
+              <a
+                :data-categoryName="c1.categoryName"
+                :data-category1Id="c1.categoryId"
+                >{{ c1.categoryName }}</a
+              >
+              <!-- <a @click="goSearch">{{ c1.categoryName }}</a> -->
+              <!-- <router-link to="/search">{{ c1.categoryName }}</router-link> -->
             </h3>
-            <div class="item-list clearfix" :style="{display: currentIndex == index ? 'block' : 'none'}">
+            <div
+              class="item-list clearfix"
+              :style="{ display: currentIndex == index ? 'block' : 'none' }"
+            >
               <div
                 class="subitem"
                 v-for="c2 in c1.categoryChild"
@@ -32,11 +41,23 @@
               >
                 <dl class="fore">
                   <dt>
-                    <a href="">{{ c2.categoryName }}</a>
+                    <a
+                      :data-categoryName="c2.categoryName"
+                      :data-category2Id="c2.categoryId"
+                      >{{ c2.categoryName }}</a
+                    >
+                    <!-- <a @click="goSearch">{{ c2.categoryName }}</a> -->
+                    <!-- <router-link to="/search">{{ c2.categoryName }}</router-link> -->
                   </dt>
                   <dd>
                     <em v-for="c3 in c2.categoryChild" :key="c3.categoryId">
-                      <a href="">{{ c3.categoryName }}</a>
+                      <a
+                        :data-categoryName="c3.categoryName"
+                        :data-category3Id="c3.categoryId"
+                        >{{ c3.categoryName }}</a
+                      >
+                      <!-- <a @click="goSearch">{{ c3.categoryName }}</a> -->
+                      <!-- <router-link to="/search">{{ c3.categoryName }}</router-link> -->
                     </em>
                   </dd>
                 </dl>
@@ -51,6 +72,13 @@
 
 <script>
 import { mapState } from "vuex";
+
+// 引入方式：把lodash全部功能函数引入
+// import _ from 'lodash'
+
+// 最好的引入方式：按需加载
+import throttle from "lodash/throttle";
+
 export default {
   name: "TypeNav",
   data() {
@@ -75,13 +103,46 @@ export default {
   },
   methods: {
     // 鼠标进入修改响应式数据currentIndex属性
-    changeIndex(index) {
-      this.currentIndex = index
-    },
+    // changeIndex(index) {
+    //   this.currentIndex = index
+    // },
+
+    // 不可用箭头函数，this会不同
+    changeIndex: throttle(function (index) {
+      this.currentIndex = index;
+    }, 50),
+
     // 鼠标移出的事件回调
     leaveIndex() {
-        this.currentIndex = -1
-    }
+      this.currentIndex = -1;
+    },
+
+    // 进行路由跳转的方法
+    goSearch(event) {
+      // 最好的解决方案：编程式导航 + 事件委托
+      // 事件委托存在的一些问题：1：点击的一定是a标签；2：如何获取参数
+      let element = event.target;
+      // dataset,获取节点的自定义属性与属性值
+      let { categoryname, category1id, category2id, category3id } =
+        element.dataset;
+      if (categoryname) {
+        // 整理路由跳转的参数
+        let location = { name: "search" };
+        let query = { categoryName: categoryname };
+        // 一级、二级、三级分类的a标签
+        if (category1id) {
+          query.category1Id = category1id;
+        } else if (category2id) {
+          query.category2Id = category2id;
+        } else if (category3id) {
+          query.category3Id = category3id;
+        }
+        // 整理完参数
+        location.query = query;
+        // 路由跳转
+        this.$router.push(location);
+      }
+    },
   },
 };
 </script>
@@ -198,7 +259,7 @@ export default {
         }
 
         .cur {
-            background-color: skyblue;
+          background-color: skyblue;
         }
       }
     }
