@@ -1,8 +1,8 @@
 <template>
   <!-- 商品分类导航 -->
   <div class="type-nav">
-    <div class="container">
-      <h2 class="all">全部商品分类</h2>
+    <div class="container" @mouseleave="leaveShow">
+      <h2 class="all" @mouseenter="enterShow">全部商品分类</h2>
       <nav class="nav">
         <a href="###">服装城</a>
         <a href="###">美妆馆</a>
@@ -13,59 +13,62 @@
         <a href="###">有趣</a>
         <a href="###">秒杀</a>
       </nav>
-      <div class="sort">
-        <div class="all-sort-list2" @click="goSearch" @mouseleave="leaveIndex">
-          <div
-            class="item"
-            v-for="(c1, index) in categoryList"
-            :key="c1.categoryId"
-            :class="{ cur: currentIndex == index }"
-          >
-            <h3 @mouseenter="changeIndex(index)">
-              <a
-                :data-categoryName="c1.categoryName"
-                :data-category1Id="c1.categoryId"
-                >{{ c1.categoryName }}</a
-              >
-              <!-- <a @click="goSearch">{{ c1.categoryName }}</a> -->
-              <!-- <router-link to="/search">{{ c1.categoryName }}</router-link> -->
-            </h3>
+      <!-- 过渡动画 -->
+      <transition name="sort">
+        <div class="sort" v-show="show">
+          <div class="all-sort-list2" @click="goSearch" @mouseleave="leaveIndex">
             <div
-              class="item-list clearfix"
-              :style="{ display: currentIndex == index ? 'block' : 'none' }"
+              class="item"
+              v-for="(c1, index) in categoryList"
+              :key="c1.categoryId"
+              :class="{ cur: currentIndex == index }"
             >
+              <h3 @mouseenter="changeIndex(index)">
+                <a
+                  :data-categoryName="c1.categoryName"
+                  :data-category1Id="c1.categoryId"
+                  >{{ c1.categoryName }}</a
+                >
+                <!-- <a @click="goSearch">{{ c1.categoryName }}</a> -->
+                <!-- <router-link to="/search">{{ c1.categoryName }}</router-link> -->
+              </h3>
               <div
-                class="subitem"
-                v-for="c2 in c1.categoryChild"
-                :key="c2.categoryId"
+                class="item-list clearfix"
+                :style="{ display: currentIndex == index ? 'block' : 'none' }"
               >
-                <dl class="fore">
-                  <dt>
-                    <a
-                      :data-categoryName="c2.categoryName"
-                      :data-category2Id="c2.categoryId"
-                      >{{ c2.categoryName }}</a
-                    >
-                    <!-- <a @click="goSearch">{{ c2.categoryName }}</a> -->
-                    <!-- <router-link to="/search">{{ c2.categoryName }}</router-link> -->
-                  </dt>
-                  <dd>
-                    <em v-for="c3 in c2.categoryChild" :key="c3.categoryId">
+                <div
+                  class="subitem"
+                  v-for="c2 in c1.categoryChild"
+                  :key="c2.categoryId"
+                >
+                  <dl class="fore">
+                    <dt>
                       <a
-                        :data-categoryName="c3.categoryName"
-                        :data-category3Id="c3.categoryId"
-                        >{{ c3.categoryName }}</a
+                        :data-categoryName="c2.categoryName"
+                        :data-category2Id="c2.categoryId"
+                        >{{ c2.categoryName }}</a
                       >
-                      <!-- <a @click="goSearch">{{ c3.categoryName }}</a> -->
-                      <!-- <router-link to="/search">{{ c3.categoryName }}</router-link> -->
-                    </em>
-                  </dd>
-                </dl>
+                      <!-- <a @click="goSearch">{{ c2.categoryName }}</a> -->
+                      <!-- <router-link to="/search">{{ c2.categoryName }}</router-link> -->
+                    </dt>
+                    <dd>
+                      <em v-for="c3 in c2.categoryChild" :key="c3.categoryId">
+                        <a
+                          :data-categoryName="c3.categoryName"
+                          :data-category3Id="c3.categoryId"
+                          >{{ c3.categoryName }}</a
+                        >
+                        <!-- <a @click="goSearch">{{ c3.categoryName }}</a> -->
+                        <!-- <router-link to="/search">{{ c3.categoryName }}</router-link> -->
+                      </em>
+                    </dd>
+                  </dl>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -84,12 +87,16 @@ export default {
   data() {
     return {
       currentIndex: -1,
-    };
+      show: true,
+    }
   },
   // 组件挂载完毕：可以向往服器发请求
   mounted() {
-    // 通知Vuex发请求，获取数据，存储于仓库当中
-    this.$store.dispatch("categoryList");
+    // 当组件挂载完毕，让show属性变为false
+    // 如果不是home组件，show属性为false
+    if(this.$route.path !== '/home') {
+      this.show = false
+    }
   },
   computed: {
     ...mapState({
@@ -143,6 +150,18 @@ export default {
         this.$router.push(location);
       }
     },
+
+    // 当鼠标移入的时候，让商品分类列表进行展示
+    enterShow() {
+      this.show = true
+    },
+
+    // 鼠标移出，隐藏商品列表
+    leaveShow() {
+      if(this.$route.path !== '/home') {
+        this.show = false
+      }
+    }
   },
 };
 </script>
@@ -262,6 +281,20 @@ export default {
           background-color: skyblue;
         }
       }
+    }
+
+    // 过渡动画的样式
+    // 过渡动画开始状态（进入）
+    .sort-enter {
+      opacity: 0;
+    }
+    // 过渡动画结束状态（进入）
+    .sort-enter-to {
+      opacity: 1;
+    }
+    // 定义动画时间、速率
+    .sort-enter-active {
+      transition: all .5s linear;
     }
   }
 }
